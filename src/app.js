@@ -9,10 +9,10 @@ var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
 var stats;
 
-var p1 = new THREE.Vector3( -10, 0, 0 );
-var p2 = new THREE.Vector3( -5, 15, 0 );
-var p3 = new THREE.Vector3( 20, 15, 0 );
-var p4 = new THREE.Vector3( 10, 0, 0 );
+var p1 = new THREE.Vector3( -10, -10, 0 );
+var p2 = new THREE.Vector3( -15, 15, 0 );
+var p3 = new THREE.Vector3( 20, 5, 0 );
+var p4 = new THREE.Vector3( 10, -10, 0 );
 
 
 init();
@@ -32,7 +32,7 @@ function initStats() {
 
 function initCamera() {
   camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
-  camera.position.z = 100;
+  camera.position.z = 50;
   camera.position.y = 0;
 }
 
@@ -54,19 +54,53 @@ function initLines() {
   var geometry = new THREE.Geometry();
   geometry.vertices = curve.getPoints( 50 );
 
-  var material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
+  var material = new THREE.LineBasicMaterial( { color : 0xff0000, linewidth: 5 } );
 
   // Create the final Object3d to add to the scene
   var curveObject = new THREE.Line( geometry, material );
   scene.add(curveObject);
 }
 
-function initPoint(position) {
-  var geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
+function addPoint(position) {
+  var geometry = new THREE.SphereGeometry( 0.2, 5, 5 );
   var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
   var sphere = new THREE.Mesh( geometry, material );
   sphere.position = position;
   scene.add( sphere );
+}
+
+function initPoints() {
+  addPoint(p1);
+  addPoint(p2);
+  addPoint(p3);
+  addPoint(p4);
+}
+
+function addTangent( t ) {
+  var curve = new THREE.SplineCurve3([p1,p2,p3,p4]);
+  var tangent = curve.getTangent(t);
+  tangent.x *= 2;
+  tangent.y *= 2;
+  tangent.z *= 2;
+  var start = curve.getPoint(t);
+  var end =  curve.getPoint(t);
+  end.x += tangent.x;
+  end.y += tangent.y;
+  end.z += tangent.z;
+  var geometry = new THREE.Geometry();
+  geometry.vertices.push(start);
+  geometry.vertices.push(end);
+  var material = new THREE.LineBasicMaterial( { color : 0xffffff, linewidth: 5 } );
+  var line = new THREE.Line(geometry, material);
+  scene.add(line);
+}
+
+function initTangents() {
+  addTangent(0);
+  addTangent(0.25);
+  addTangent(0.5);
+  addTangent(0.75);
+  addTangent(1);
 }
 
 function init() {
@@ -76,11 +110,9 @@ function init() {
   initCamera();
   initRenderer();
   initScene();
+  initTangents();
   initLines();
-  initPoint(p1);
-  initPoint(p2);
-  initPoint(p3);
-  initPoint(p4);
+  initPoints();
 
   document.addEventListener( 'mousemove', onDocumentMouseMove, false );
   window.addEventListener( 'resize', onWindowResize, false );
