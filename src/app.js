@@ -50,8 +50,7 @@ function initScene() {
 }
 
 function initLines() {
-  var curve = new THREE.CubicBezierCurve3(p1, p2, p3, p4);
-
+  var curve = new THREE.SplineCurve3([p1,p2,p3,p4]);
   var geometry = new THREE.Geometry();
   geometry.vertices = curve.getPoints( 50 );
 
