@@ -9,6 +9,12 @@ var windowHalfX = window.innerWidth / 2;
 var windowHalfY = window.innerHeight / 2;
 var stats;
 
+var p1 = new THREE.Vector3( -10, 0, 0 );
+var p2 = new THREE.Vector3( -5, 15, 0 );
+var p3 = new THREE.Vector3( 20, 15, 0 );
+var p4 = new THREE.Vector3( 10, 0, 0 );
+
+
 init();
 animate();
 
@@ -44,13 +50,24 @@ function initScene() {
 }
 
 function initLines() {
-  var material = new THREE.LineBasicMaterial({ color: 0xffffff });
+  var curve = new THREE.CubicBezierCurve3(p1, p2, p3, p4);
+
   var geometry = new THREE.Geometry();
-  geometry.vertices.push(new THREE.Vector3(-10, 0, 0));
-  geometry.vertices.push(new THREE.Vector3(0, 10, 0));
-  geometry.vertices.push(new THREE.Vector3(10, 0, 0));
-  var line = new THREE.Line(geometry, material);
-  scene.add(line);
+  geometry.vertices = curve.getPoints( 50 );
+
+  var material = new THREE.LineBasicMaterial( { color : 0xff0000 } );
+
+  // Create the final Object3d to add to the scene
+  var curveObject = new THREE.Line( geometry, material );
+  scene.add(curveObject);
+}
+
+function initPoint(position) {
+  var geometry = new THREE.SphereGeometry( 0.5, 32, 32 );
+  var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+  var sphere = new THREE.Mesh( geometry, material );
+  sphere.position = position;
+  scene.add( sphere );
 }
 
 function init() {
@@ -61,6 +78,10 @@ function init() {
   initRenderer();
   initScene();
   initLines();
+  initPoint(p1);
+  initPoint(p2);
+  initPoint(p3);
+  initPoint(p4);
 
   document.addEventListener( 'mousemove', onDocumentMouseMove, false );
   window.addEventListener( 'resize', onWindowResize, false );
