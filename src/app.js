@@ -10,9 +10,10 @@ var windowHalfY = window.innerHeight / 2;
 var stats;
 
 var p1 = new THREE.Vector3( -10, -10, 0 );
-var p2 = new THREE.Vector3( -15, 15, 0 );
-var p3 = new THREE.Vector3( 20, 5, 0 );
+var p2 = new THREE.Vector3( -15, 15, 10 );
+var p3 = new THREE.Vector3( 20, 5, -10 );
 var p4 = new THREE.Vector3( 10, -10, 0 );
+var curve = new THREE.SplineCurve3([p1,p2,p3,p4]);
 
 
 init();
@@ -50,11 +51,10 @@ function initScene() {
 }
 
 function initLines() {
-  var curve = new THREE.SplineCurve3([p1,p2,p3,p4]);
   var geometry = new THREE.Geometry();
   geometry.vertices = curve.getPoints( 50 );
 
-  var material = new THREE.LineBasicMaterial( { color : 0xff0000, linewidth: 5 } );
+  var material = new THREE.LineBasicMaterial( { color : 0xff0000, linewidth: 2 } );
 
   // Create the final Object3d to add to the scene
   var curveObject = new THREE.Line( geometry, material );
@@ -77,30 +77,32 @@ function initPoints() {
 }
 
 function addTangent( t ) {
-  var curve = new THREE.SplineCurve3([p1,p2,p3,p4]);
   var tangent = curve.getTangent(t);
   tangent.x *= 2;
   tangent.y *= 2;
   tangent.z *= 2;
+  addVectorToPoint(t, tangent);
+}
+
+function addVectorToPoint( t, dir ) {
   var start = curve.getPoint(t);
   var end =  curve.getPoint(t);
-  end.x += tangent.x;
-  end.y += tangent.y;
-  end.z += tangent.z;
+  end.x += dir.x;
+  end.y += dir.y;
+  end.z += dir.z;
   var geometry = new THREE.Geometry();
   geometry.vertices.push(start);
   geometry.vertices.push(end);
-  var material = new THREE.LineBasicMaterial( { color : 0xffffff, linewidth: 5 } );
+  var material = new THREE.LineBasicMaterial( { color : 0xffffff, linewidth: 2 } );
   var line = new THREE.Line(geometry, material);
   scene.add(line);
 }
 
+
 function initTangents() {
-  addTangent(0);
-  addTangent(0.25);
-  addTangent(0.5);
-  addTangent(0.75);
-  addTangent(1);
+  for (var j = 0; j < 50; j++) {
+    addTangent(j/50.0);
+  };
 }
 
 function init() {
@@ -140,9 +142,9 @@ function animate() {
 
 function render() {
   stats.begin();
-  // camera.position.x += ( mouseX - camera.position.x ) * .1;
-  // camera.position.y += ( - mouseY - camera.position.y ) * .1;
-  // camera.lookAt( scene.position );
+  camera.position.x += ( mouseX - camera.position.x ) * .1;
+  camera.position.y += ( - mouseY - camera.position.y ) * .1;
+  camera.lookAt( scene.position );
   renderer.clear( true, true, false );
   renderer.setClearColor( 0x010, 0 );
   renderer.render( scene, camera );
