@@ -10,10 +10,14 @@ var windowHalfY = window.innerHeight / 2;
 var stats;
 
 var p1 = new THREE.Vector3( -10, -10, 0 );
-var p2 = new THREE.Vector3( -15, 15, 10 );
-var p3 = new THREE.Vector3( 20, 5, -10 );
+var p2 = new THREE.Vector3( -35, 35, 10 );
+var p3 = new THREE.Vector3( 50, 5, -20 );
 var p4 = new THREE.Vector3( 10, -10, 0 );
-var curve = new THREE.SplineCurve3([p1,p2,p3,p4]);
+var p5 = new THREE.Vector3( -30, 40, -10 );
+var p6 = new THREE.Vector3( 20, 40, -30 );
+var p7 = new THREE.Vector3( 30, -10, 20 );
+var p8 = new THREE.Vector3( -20, -40, 10 );
+var curve = new THREE.SplineCurve3([p1,p2,p3,p4,p5,p6,p7,p8]);
 
 
 init();
@@ -62,7 +66,7 @@ function initLines() {
 }
 
 function addPoint(position) {
-  var geometry = new THREE.SphereGeometry( 0.2, 5, 5 );
+  var geometry = new THREE.SphereGeometry( 2, 5, 5 );
   var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
   var sphere = new THREE.Mesh( geometry, material );
   sphere.position = position;
@@ -74,6 +78,10 @@ function initPoints() {
   addPoint(p2);
   addPoint(p3);
   addPoint(p4);
+  addPoint(p5);
+  addPoint(p6);
+  addPoint(p7);
+  addPoint(p8);
 }
 
 function addTangent( t ) {
@@ -81,10 +89,10 @@ function addTangent( t ) {
   tangent.x *= 2;
   tangent.y *= 2;
   tangent.z *= 2;
-  addVectorToPoint(t, tangent);
+  addVectorToPoint(t, tangent, 0xffffff);
 }
 
-function addVectorToPoint( t, dir ) {
+function addVectorToPoint( t, dir, color ) {
   var start = curve.getPoint(t);
   var end =  curve.getPoint(t);
   end.x += dir.x;
@@ -93,15 +101,30 @@ function addVectorToPoint( t, dir ) {
   var geometry = new THREE.Geometry();
   geometry.vertices.push(start);
   geometry.vertices.push(end);
-  var material = new THREE.LineBasicMaterial( { color : 0xffffff, linewidth: 2 } );
+  var material = new THREE.LineBasicMaterial( { color : color, linewidth: 2 } );
   var line = new THREE.Line(geometry, material);
   scene.add(line);
 }
 
-
 function initTangents() {
-  for (var j = 0; j < 50; j++) {
-    addTangent(j/50.0);
+  for (var j = 0; j < 500; j++) {
+    addTangent(j/500.0);
+  };
+}
+
+function initCrosses() {
+  var oldTangent = curve.getTangent(0);
+  var cross = new THREE.Vector3();
+  for (var j = 0; j < 500; j++) {
+    var t = j/500.0;
+    var newTangent = curve.getTangent(t);
+    cross.crossVectors(oldTangent, newTangent);
+    cross.normalize();
+    cross.x *= 5;
+    cross.y *= 5;
+    cross.z *= 5;
+    addVectorToPoint(t, cross, 0x00ff00);
+    oldTangent = newTangent;
   };
 }
 
@@ -115,6 +138,7 @@ function init() {
   initTangents();
   initLines();
   initPoints();
+  initCrosses();
 
   document.addEventListener( 'mousemove', onDocumentMouseMove, false );
   window.addEventListener( 'resize', onWindowResize, false );
